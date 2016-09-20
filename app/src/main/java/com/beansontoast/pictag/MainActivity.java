@@ -24,6 +24,7 @@ import org.apache.sanselan.formats.tiff.write.TiffOutputDirectory;
 import org.apache.sanselan.formats.tiff.write.TiffOutputField;
 import org.apache.sanselan.formats.tiff.write.TiffOutputSet;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -60,16 +61,31 @@ public class MainActivity extends AppCompatActivity {
                 String title = cur.getString(cur.getColumnIndex(MediaStore.Images.Media.DATA));//.ImageColumns.TITLE));
                 String data = cur.getString(cur.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
                 String mimeType = cur.getString(cur.getColumnIndex(MediaStore.Images.ImageColumns.MIME_TYPE));
-                long size = cur.getLong(cur.getColumnIndex(MediaStore.Images.ImageColumns.SIZE));
 
                 File f = new File(data);
                 if (f.length() > 0) {
                     String here = "";
 
+                    int size = (int) f.length();
+                    byte[] bytes = new byte[size];
+                    try {
+                        BufferedInputStream buf = new BufferedInputStream(new FileInputStream(f));
+                        buf.read(bytes, 0, bytes.length);
+                        buf.close();
+                    } catch (FileNotFoundException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+                    String here3 = "";
+
                     try {
                         boolean canRead = f.canRead();
                         boolean canWrite = f.canWrite();
-                        changeExifMetadata(f, f);
+                        changeExifMetadata(bytes, f);
 
                         String here2 = "";
                     } catch (IOException e) {
@@ -87,88 +103,25 @@ public class MainActivity extends AppCompatActivity {
             String here = "Empty";
         }
     }
-
-
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight
-                    && (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-        return inSampleSize;
-    }
-
-    public String getRealPathFromURI(Uri contentUri) {
-
-        Cursor cursor = null;
-        try {
-
-            String[] proj = { MediaStore.Images.Media.DATA };
-            cursor = getContentResolver().query(contentUri,  proj, null, null, null);
-            cursor.moveToFirst();
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            return cursor.getString(column_index);
-        } finally {
-
-            if (cursor != null) {
-
-                cursor.close();
-            }
-        }
-    }
-
-    private void copyFile(File sourceFile, File destFile) throws IOException {
-        if (!sourceFile.exists()) {
-            return;
-        }
-
-        FileChannel source = null;
-        FileChannel destination = null;
-        source = new FileInputStream(sourceFile).getChannel();
-        destination = new FileOutputStream(destFile).getChannel();
-        if (destination != null && source != null) {
-            destination.transferFrom(source, 0, source.size());
-        }
-        if (source != null) {
-            source.close();
-        }
-        if (destination != null) {
-            destination.close();
-        }
-    }
-
     /**
      * This example illustrates how to add/update EXIF metadata in a JPEG file.
      *
-     * @param jpegImageFile A source image file.
+     * @param data source byte array.
      * @param dst           The output file.
      * @throws java.io.IOException
      * @throws org.apache.sanselan.ImageReadException
      * @throws org.apache.sanselan.ImageWriteException
      */
-    public void changeExifMetadata(final File jpegImageFile, final File dst)
+    public void changeExifMetadata(final byte[] data, final File dst)
             throws IOException, ImageReadException, ImageWriteException {
 
-        FileOutputStream fos = new FileOutputStream(dst);
-        OutputStream os = new BufferedOutputStream(fos);
+     //   FileOutputStream fos = new FileOutputStream(dst);
+     //   OutputStream os = new BufferedOutputStream(fos);
 
         TiffOutputSet outputSet = null;
 
         // note that metadata might be null if no metadata is found.
-        final IImageMetadata metadata = Sanselan.getMetadata(jpegImageFile);
+        final IImageMetadata metadata = Sanselan.getMetadata(data);
         final JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
         if (null != jpegMetadata) {
             // note that exif might be null if no Exif metadata is found.
@@ -231,8 +184,8 @@ public class MainActivity extends AppCompatActivity {
 
         // printTagValue(jpegMetadata, TiffConstants.TIFF_TAG_DATE_TIME);
 
-        new ExifRewriter().updateExifMetadataLossless(jpegImageFile, os,
-                outputSet);
+        /*new ExifRewriter().updateExifMetadataLossless(jpegImageFile, os,
+                outputSet);*/
 
     }
 }
