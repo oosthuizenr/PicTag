@@ -1,11 +1,7 @@
 package com.beansontoast.pictag;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,27 +10,15 @@ import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.ImageWriteException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
-import org.apache.sanselan.common.ImageMetadata;
 import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
-import org.apache.sanselan.formats.jpeg.exifRewrite.ExifRewriter;
 import org.apache.sanselan.formats.tiff.TiffImageMetadata;
-import org.apache.sanselan.formats.tiff.constants.ExifTagConstants;
 import org.apache.sanselan.formats.tiff.constants.TiffConstants;
 import org.apache.sanselan.formats.tiff.write.TiffOutputDirectory;
 import org.apache.sanselan.formats.tiff.write.TiffOutputField;
 import org.apache.sanselan.formats.tiff.write.TiffOutputSet;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -64,30 +48,9 @@ public class MainActivity extends AppCompatActivity {
 
                 File f = new File(data);
                 if (f.length() > 0) {
-                    String here = "";
-
-                    int size = (int) f.length();
-                    byte[] bytes = new byte[size];
                     try {
-                        BufferedInputStream buf = new BufferedInputStream(new FileInputStream(f));
-                        buf.read(bytes, 0, bytes.length);
-                        buf.close();
-                    } catch (FileNotFoundException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-
-                    String here3 = "";
-
-                    try {
-                        boolean canRead = f.canRead();
-                        boolean canWrite = f.canWrite();
                         changeExifMetadata(f, f);
 
-                        String here2 = "";
                     } catch (IOException e) {
                         e.printStackTrace();
                     } catch (ImageReadException e) {
@@ -169,17 +132,6 @@ public class MainActivity extends AppCompatActivity {
                     "Test");
             exifDirectory.removeField(TiffConstants.EXIF_TAG_IMAGE_DESCRIPTION);
             exifDirectory.add(longitudeRefField);
-        }
-
-        {
-            // Example of how to add/update GPS info to output set.
-
-            // New York City
-            final double longitude = -74.0; // 74 degrees W (in Degrees East)
-            final double latitude = 40 + 43 / 60.0; // 40 degrees N (in Degrees
-            // North)
-
-            outputSet.setGPSInDegrees(longitude, latitude);
         }
 
         // printTagValue(jpegMetadata, TiffConstants.TIFF_TAG_DATE_TIME);
