@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             cur.moveToFirst();
             do {
                 int id = cur.getInt(cur.getColumnIndex(MediaStore.Images.ImageColumns._ID));
-                String title = cur.getString(cur.getColumnIndex(MediaStore.Images.Media.DATA));//.ImageColumns.TITLE));
+                String title = cur.getString(cur.getColumnIndex(MediaStore.Images.Media.DATA));
                 String data = cur.getString(cur.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
                 String mimeType = cur.getString(cur.getColumnIndex(MediaStore.Images.ImageColumns.MIME_TYPE));
 
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         boolean canRead = f.canRead();
                         boolean canWrite = f.canWrite();
-                        changeExifMetadata(bytes, f);
+                        changeExifMetadata(f, f);
 
                         String here2 = "";
                     } catch (IOException e) {
@@ -106,13 +106,13 @@ public class MainActivity extends AppCompatActivity {
     /**
      * This example illustrates how to add/update EXIF metadata in a JPEG file.
      *
-     * @param data source byte array.
+     * @param src source byte array.
      * @param dst           The output file.
      * @throws java.io.IOException
      * @throws org.apache.sanselan.ImageReadException
      * @throws org.apache.sanselan.ImageWriteException
      */
-    public void changeExifMetadata(final byte[] data, final File dst)
+    public void changeExifMetadata(File src, final File dst)
             throws IOException, ImageReadException, ImageWriteException {
 
      //   FileOutputStream fos = new FileOutputStream(dst);
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         TiffOutputSet outputSet = null;
 
         // note that metadata might be null if no metadata is found.
-        final IImageMetadata metadata = Sanselan.getMetadata(data);
+        final IImageMetadata metadata = Sanselan.getMetadata(src);
         final JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
         if (null != jpegMetadata) {
             // note that exif might be null if no Exif metadata is found.
