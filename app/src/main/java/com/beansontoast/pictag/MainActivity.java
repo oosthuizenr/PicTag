@@ -42,9 +42,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        
-
-        /*ContentResolver cr = getContentResolver();
+        ContentResolver cr = getContentResolver();
 
         String[] columns = new String[]{
                 MediaStore.Images.ImageColumns._ID,
@@ -64,109 +62,30 @@ public class MainActivity extends AppCompatActivity {
                 String mimeType = cur.getString(cur.getColumnIndex(MediaStore.Images.ImageColumns.MIME_TYPE));
                 long size = cur.getLong(cur.getColumnIndex(MediaStore.Images.ImageColumns.SIZE));
 
-                Uri uri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, ""+ id);
-
-                try {
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inJustDecodeBounds = true;
-
-                    BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, options);
-                    options.inSampleSize = calculateInSampleSize(options, 100, 100);
-                    options.inJustDecodeBounds = false;
-                    Bitmap image = BitmapFactory.decodeStream(getContentResolver().openInputStream(Uri.parse("file://" + data)), null, options);
-
+                File f = new File(data);
+                if (f.length() > 0) {
                     String here = "";
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                // String path = getRealPathFromURI(Uri.parse("file://" + data));
 
-                try {
-                    InputStream is = getContentResolver().openInputStream(Uri.parse("file://" + data));
+                    try {
+                        boolean canRead = f.canRead();
+                        boolean canWrite = f.canWrite();
+                        changeExifMetadata(f, f);
 
-
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    byte[] b = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = is.read(b)) != -1) {
-                        bos.write(b, 0, bytesRead);
-                    }
-                    byte[] bytes = bos.toByteArray();
-
-                    *//*ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    FileInputStream fis = new FileInputStream(new File(data));
-
-                    byte[] buf = new byte[1024];
-                    int n;
-                    while (-1 != (n = fis.read(buf)))
-                        baos.write(buf, 0, n);
-
-                    byte[] videoBytes = baos.toByteArray();*//*
-
-                    String here = "";
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
-                try {
-
-                    InputStream is = getContentResolver().openInputStream(Uri.parse("file://" + data));
-
-
-                    ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-
-                    // this is storage overwritten on each iteration with bytes
-                    int bufferSize = 1024;
-                    byte[] buffer = new byte[bufferSize];
-
-                    // we need to know how may bytes were read to write them to the byteBuffer
-                    int len = 0;
-                    while ((len = is.read(buffer)) != -1) {
-                        byteBuffer.write(buffer, 0, len);
+                        String here2 = "";
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ImageReadException e) {
+                        e.printStackTrace();
+                    } catch (ImageWriteException e) {
+                        e.printStackTrace();
                     }
 
-                    byte[] b = byteBuffer.toByteArray();
-
-                    String here = "";
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
-*//*
-                File dir = new File(getFilesDir(), "temp");
-                dir.mkdirs();
-
-              File f = new File(dir, "temp.jpg");
-
-
-                try {
-                    copyFile(new File(data), f);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                //File f = new File(data);
-
-
-                try {
-                    boolean canRead = f.canRead();
-                    boolean canWrite = f.canWrite();
-                    changeExifMetadata(f, f);
-
-                    String here = "";
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ImageReadException e) {
-                    e.printStackTrace();
-                } catch (ImageWriteException e) {
-                    e.printStackTrace();
-                }*//*
-
                 String here = "";
             } while (cur.moveToNext());
         } else {
             String here = "Empty";
-        }*/
+        }
     }
 
 
