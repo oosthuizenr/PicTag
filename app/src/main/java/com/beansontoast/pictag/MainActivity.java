@@ -1,7 +1,11 @@
 package com.beansontoast.pictag;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,10 +25,15 @@ import org.apache.sanselan.formats.tiff.write.TiffOutputField;
 import org.apache.sanselan.formats.tiff.write.TiffOutputSet;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,12 +42,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ContentResolver cr = getContentResolver();
+        
+
+        /*ContentResolver cr = getContentResolver();
 
         String[] columns = new String[]{
                 MediaStore.Images.ImageColumns._ID,
                 MediaStore.Images.ImageColumns.TITLE,
-                MediaStore.Images.ImageColumns.DATA,
+                MediaStore.Images.Media.DATA,
                 MediaStore.Images.ImageColumns.MIME_TYPE,
                 MediaStore.Images.ImageColumns.SIZE};
         Cursor cur = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -48,13 +59,98 @@ public class MainActivity extends AppCompatActivity {
             cur.moveToFirst();
             do {
                 int id = cur.getInt(cur.getColumnIndex(MediaStore.Images.ImageColumns._ID));
-                String title = cur.getString(cur.getColumnIndex(MediaStore.Images.ImageColumns.TITLE));
+                String title = cur.getString(cur.getColumnIndex(MediaStore.Images.Media.DATA));//.ImageColumns.TITLE));
                 String data = cur.getString(cur.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
                 String mimeType = cur.getString(cur.getColumnIndex(MediaStore.Images.ImageColumns.MIME_TYPE));
                 long size = cur.getLong(cur.getColumnIndex(MediaStore.Images.ImageColumns.SIZE));
 
-                File f = new File(data);
+                Uri uri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, ""+ id);
+
                 try {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+
+                    BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, options);
+                    options.inSampleSize = calculateInSampleSize(options, 100, 100);
+                    options.inJustDecodeBounds = false;
+                    Bitmap image = BitmapFactory.decodeStream(getContentResolver().openInputStream(Uri.parse("file://" + data)), null, options);
+
+                    String here = "";
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                // String path = getRealPathFromURI(Uri.parse("file://" + data));
+
+                try {
+                    InputStream is = getContentResolver().openInputStream(Uri.parse("file://" + data));
+
+
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    byte[] b = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = is.read(b)) != -1) {
+                        bos.write(b, 0, bytesRead);
+                    }
+                    byte[] bytes = bos.toByteArray();
+
+                    *//*ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    FileInputStream fis = new FileInputStream(new File(data));
+
+                    byte[] buf = new byte[1024];
+                    int n;
+                    while (-1 != (n = fis.read(buf)))
+                        baos.write(buf, 0, n);
+
+                    byte[] videoBytes = baos.toByteArray();*//*
+
+                    String here = "";
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+                try {
+
+                    InputStream is = getContentResolver().openInputStream(Uri.parse("file://" + data));
+
+
+                    ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+
+                    // this is storage overwritten on each iteration with bytes
+                    int bufferSize = 1024;
+                    byte[] buffer = new byte[bufferSize];
+
+                    // we need to know how may bytes were read to write them to the byteBuffer
+                    int len = 0;
+                    while ((len = is.read(buffer)) != -1) {
+                        byteBuffer.write(buffer, 0, len);
+                    }
+
+                    byte[] b = byteBuffer.toByteArray();
+
+                    String here = "";
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+*//*
+                File dir = new File(getFilesDir(), "temp");
+                dir.mkdirs();
+
+              File f = new File(dir, "temp.jpg");
+
+
+                try {
+                    copyFile(new File(data), f);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                //File f = new File(data);
+
+
+                try {
+                    boolean canRead = f.canRead();
+                    boolean canWrite = f.canWrite();
                     changeExifMetadata(f, f);
 
                     String here = "";
@@ -64,12 +160,74 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 } catch (ImageWriteException e) {
                     e.printStackTrace();
-                }
+                }*//*
 
                 String here = "";
             } while (cur.moveToNext());
         } else {
             String here = "Empty";
+        }*/
+    }
+
+
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+        return inSampleSize;
+    }
+
+    public String getRealPathFromURI(Uri contentUri) {
+
+        Cursor cursor = null;
+        try {
+
+            String[] proj = { MediaStore.Images.Media.DATA };
+            cursor = getContentResolver().query(contentUri,  proj, null, null, null);
+            cursor.moveToFirst();
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            return cursor.getString(column_index);
+        } finally {
+
+            if (cursor != null) {
+
+                cursor.close();
+            }
+        }
+    }
+
+    private void copyFile(File sourceFile, File destFile) throws IOException {
+        if (!sourceFile.exists()) {
+            return;
+        }
+
+        FileChannel source = null;
+        FileChannel destination = null;
+        source = new FileInputStream(sourceFile).getChannel();
+        destination = new FileOutputStream(destFile).getChannel();
+        if (destination != null && source != null) {
+            destination.transferFrom(source, 0, source.size());
+        }
+        if (source != null) {
+            source.close();
+        }
+        if (destination != null) {
+            destination.close();
         }
     }
 

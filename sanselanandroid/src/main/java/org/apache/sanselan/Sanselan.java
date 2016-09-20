@@ -139,7 +139,7 @@ public abstract class Sanselan implements SanselanConstants {
 
 		try {
 			is = byteSource.getInputStream();
-
+int avail = is.available();
 			int i1 = is.read();
 			int i2 = is.read();
 			if ((i1 < 0) || (i2 < 0))
