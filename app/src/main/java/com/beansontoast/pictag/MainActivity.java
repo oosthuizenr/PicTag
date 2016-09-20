@@ -1,10 +1,14 @@
 package com.beansontoast.pictag;
 
+import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Intent;
 import android.database.Cursor;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.beansontoast.pictag.util.Utils;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.ImageWriteException;
@@ -27,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+/*
         ContentResolver cr = getContentResolver();
 
         String[] columns = new String[]{
@@ -64,8 +70,24 @@ public class MainActivity extends AppCompatActivity {
             } while (cur.moveToNext());
         } else {
             String here = "Empty";
+        }*/
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        String[] PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        if (!Utils.hasPermissions(MainActivity.this, PERMISSIONS)) {
+            Intent i = new Intent(MainActivity.this, IntroActivity.class);
+            startActivity(i);
+        } else {
+
         }
     }
+
     /**
      * This example illustrates how to add/update EXIF metadata in a JPEG file.
      *
