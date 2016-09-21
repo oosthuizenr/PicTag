@@ -82,7 +82,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.MyViewHo
         public void bind(MediaStoreData item) {
             Glide.with(mImg.getContext()).load(item.getUri())
                     .thumbnail(0.5f)
-                    .override(200,200)
+                    //.override(200,200)
                     .crossFade()
                     .diskCacheStrategy(DiskCacheStrategy.RESULT)
                     .into(mImg);
