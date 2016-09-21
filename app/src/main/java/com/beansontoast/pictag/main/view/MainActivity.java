@@ -2,9 +2,14 @@ package com.beansontoast.pictag.main.view;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 
 import com.beansontoast.pictag.MainApplication;
 import com.beansontoast.pictag.R;
+import com.beansontoast.pictag.listeners.RecyclerViewOnClickListener;
+import com.beansontoast.pictag.main.adapter.GalleryAdapter;
 import com.beansontoast.pictag.main.presenter.IMainActivityPresenter;
 import com.beansontoast.pictag.model.MediaStoreData;
 
@@ -30,12 +35,27 @@ public class MainActivity extends AppCompatActivity implements IMainActivityView
     @Inject
     IMainActivityPresenter mPresenter;
 
+    @Inject
+    GalleryAdapter mAdapter;
+
+    private RecyclerView rvItems;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         MainApplication.from(this).getGraph().inject(this);
+
+        rvItems = (RecyclerView) findViewById(R.id.list);
+        rvItems.setAdapter(mAdapter);
+        rvItems.setLayoutManager(new GridLayoutManager(this, 3));
+        rvItems.setHasFixedSize(true);
+
+        mAdapter.setOnClickListener(mediaStoreClickListener);
     }
 
     @Override
@@ -56,11 +76,33 @@ public class MainActivity extends AppCompatActivity implements IMainActivityView
         }*/
     }
 
+    RecyclerViewOnClickListener<MediaStoreData> mediaStoreClickListener = new RecyclerViewOnClickListener<MediaStoreData>() {
+        @Override
+        public void onItemClick(MediaStoreData item) {
+
+        }
+    };
+
     @Override
     protected void onPause() {
         mPresenter.onPause();
         mPresenter.clearView();
         super.onPause();
+    }
+
+    @Override
+    public void showError(String message) {
+
+    }
+
+    @Override
+    public void setModel(List<MediaStoreData> data) {
+        if (mAdapter != null) {
+            mAdapter.clearData();
+            mAdapter.setData(data);
+            rvItems.setAdapter(mAdapter);
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     /**
@@ -135,16 +177,6 @@ public class MainActivity extends AppCompatActivity implements IMainActivityView
 
         /*new ExifRewriter().updateExifMetadataLossless(jpegImageFile, os,
                 outputSet);*/
-
-    }
-
-    @Override
-    public void showError(String message) {
-
-    }
-
-    @Override
-    public void setModel(List<MediaStoreData> data) {
 
     }
 }

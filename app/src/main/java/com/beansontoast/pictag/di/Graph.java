@@ -10,7 +10,7 @@ import dagger.Component;
 /**
  * Created by renier on 9/21/2016.
  */
-@Component(modules = { PresenterModule.class, ApplicationModule.class, InteractorModule.class })
+@Component(modules = { PresenterModule.class, ApplicationModule.class, InteractorModule.class, AdapterModule.class})
 @Singleton
 public interface Graph {
     void inject(MainActivity activity);
