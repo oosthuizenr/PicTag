@@ -1,14 +1,12 @@
-package com.beansontoast.pictag;
+package com.beansontoast.pictag.main.view;
 
-import android.Manifest;
-import android.content.ContentResolver;
-import android.content.Intent;
-import android.database.Cursor;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.beansontoast.pictag.util.Utils;
+import com.beansontoast.pictag.MainApplication;
+import com.beansontoast.pictag.R;
+import com.beansontoast.pictag.main.presenter.IMainActivityPresenter;
+import com.beansontoast.pictag.model.MediaStoreData;
 
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.ImageWriteException;
@@ -23,69 +21,46 @@ import org.apache.sanselan.formats.tiff.write.TiffOutputSet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import javax.inject.Inject;
+
+public class MainActivity extends AppCompatActivity implements IMainActivityView {
+
+    @Inject
+    IMainActivityPresenter mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-/*
-        ContentResolver cr = getContentResolver();
-
-        String[] columns = new String[]{
-                MediaStore.Images.ImageColumns._ID,
-                MediaStore.Images.ImageColumns.TITLE,
-                MediaStore.Images.Media.DATA,
-                MediaStore.Images.ImageColumns.MIME_TYPE,
-                MediaStore.Images.ImageColumns.SIZE};
-        Cursor cur = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                columns, MediaStore.Images.ImageColumns.MIME_TYPE + " = 'image/jpeg'", null, null);
-
-        if (cur != null && cur.getCount() > 0) {
-            cur.moveToFirst();
-            do {
-                int id = cur.getInt(cur.getColumnIndex(MediaStore.Images.ImageColumns._ID));
-                String title = cur.getString(cur.getColumnIndex(MediaStore.Images.Media.DATA));
-                String data = cur.getString(cur.getColumnIndex(MediaStore.Images.ImageColumns.DATA));
-                String mimeType = cur.getString(cur.getColumnIndex(MediaStore.Images.ImageColumns.MIME_TYPE));
-
-                File f = new File(data);
-                if (f.length() > 0) {
-                    try {
-                        changeExifMetadata(f, f);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ImageReadException e) {
-                        e.printStackTrace();
-                    } catch (ImageWriteException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-                String here = "";
-            } while (cur.moveToNext());
-        } else {
-            String here = "Empty";
-        }*/
-
+        MainApplication.from(this).getGraph().inject(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        String[] PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        mPresenter.setView(this);
+        mPresenter.onResume();
+        /*String[] PERMISSIONS = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         if (!Utils.hasPermissions(MainActivity.this, PERMISSIONS)) {
             Intent i = new Intent(MainActivity.this, IntroActivity.class);
             startActivity(i);
         } else {
 
-        }
+
+
+        }*/
+    }
+
+    @Override
+    protected void onPause() {
+        mPresenter.onPause();
+        mPresenter.clearView();
+        super.onPause();
     }
 
     /**
@@ -160,6 +135,16 @@ public class MainActivity extends AppCompatActivity {
 
         /*new ExifRewriter().updateExifMetadataLossless(jpegImageFile, os,
                 outputSet);*/
+
+    }
+
+    @Override
+    public void showError(String message) {
+
+    }
+
+    @Override
+    public void setModel(List<MediaStoreData> data) {
 
     }
 }
